@@ -1,0 +1,934 @@
+{
+  "entities": {
+    "PrintOrder": {
+      "title": "PrintOrder",
+      "description": "Surat Perintah Kerja (SPK) dan nota transaksi pesanan cetak digital printing beserta perhitungan HPP dan piutang pelanggan.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "UID pemilik usaha digital printing.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "invoiceNumber": {
+          "type": "string",
+          "description": "Nomor nota atau SPK pesanan cetak.",
+          "minLength": 3,
+          "maxLength": 40,
+          "pattern": "^[A-Z0-9\\-/]+$"
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "Tanggal masuk pesanan (YYYY-MM-DD).",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "deadlineDate": {
+          "type": "string",
+          "description": "Tanggal estimasi selesai atau deadline produksi (YYYY-MM-DD).",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Nama pelanggan atau instansi pemesan.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Nomor WhatsApp atau telepon pelanggan.",
+          "minLength": 0,
+          "maxLength": 30
+        },
+        "jobTitle": {
+          "type": "string",
+          "description": "Nama pekerjaan atau judul file cetak.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "category": {
+          "type": "string",
+          "description": "Kategori lini layanan cetak, penjualan ATK, atau jasa.",
+          "enum": [
+            "Banner & Outdoor",
+            "Indoor & Sticker",
+            "Print A3+ & Dokumen",
+            "Merchandise & Display",
+            "Offset & Kemasan",
+            "Fotokopi, Jilid & Laminating",
+            "Penjualan ATK",
+            "Jasa Desain & Servis IT"
+          ]
+        },
+        "materialId": {
+          "type": "string",
+          "description": "ID referensi bahan baku di koleksi inventory.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "materialName": {
+          "type": "string",
+          "description": "Nama bahan baku yang digunakan.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "unitType": {
+          "type": "string",
+          "description": "Satuan perhitungan ukuran atau kuantitas.",
+          "enum": [
+            "m2",
+            "Lembar",
+            "Roll",
+            "Pcs",
+            "Paket"
+          ]
+        },
+        "widthM": {
+          "type": "number",
+          "description": "Ukuran panjang/lebar dalam meter (untuk satuan m2)."
+        },
+        "heightM": {
+          "type": "number",
+          "description": "Ukuran tinggi dalam meter (untuk satuan m2)."
+        },
+        "qty": {
+          "type": "number",
+          "description": "Jumlah pcs/lembar pesanan."
+        },
+        "totalAreaOrQty": {
+          "type": "number",
+          "description": "Total volume pemakaian bahan (m2 x qty atau jumlah lembar/pcs)."
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "Harga jual per satuan (per m2 / per lembar / per pcs)."
+        },
+        "unitCost": {
+          "type": "number",
+          "description": "Harga pokok bahan & tinta per satuan."
+        },
+        "designFee": {
+          "type": "number",
+          "description": "Biaya jasa setting atau desain grafis."
+        },
+        "finishingDesc": {
+          "type": "string",
+          "description": "Rincian pengerjaan finishing (Mata ayam, laminasi, lipat, potong).",
+          "minLength": 0,
+          "maxLength": 160
+        },
+        "finishingFee": {
+          "type": "number",
+          "description": "Biaya tambahan finishing."
+        },
+        "discount": {
+          "type": "number",
+          "description": "Potongan harga atau diskon pesanan."
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total tagihan akhir pelanggan."
+        },
+        "totalCogs": {
+          "type": "number",
+          "description": "Total Harga Pokok Produksi (HPP) untuk pesanan ini."
+        },
+        "paidAmount": {
+          "type": "number",
+          "description": "Jumlah yang sudah dibayarkan pelanggan (DP atau Lunas)."
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "Status pembayaran tagihan pesanan.",
+          "enum": [
+            "Lunas",
+            "DP / Belum Lunas",
+            "Belum Bayar"
+          ]
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Metode pembayaran yang digunakan.",
+          "enum": [
+            "Tunai",
+            "Transfer Bank",
+            "QRIS",
+            "Tempo"
+          ]
+        },
+        "productionStatus": {
+          "type": "string",
+          "description": "Status tahapan produksi SPK.",
+          "enum": [
+            "Antrean Desain",
+            "Proses Cetak",
+            "Finishing",
+            "Siap Ambil",
+            "Selesai",
+            "Dibatalkan"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "description": "Catatan spesifikasi produksi untuk operator.",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "cashierName": {
+          "type": "string",
+          "description": "Nama kasir atau admin yang melayani dan menyimpan transaksi SPK.",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "cartItemsJson": {
+          "type": "string",
+          "description": "JSON rincian daftar item keranjang pesanan apabila 1 nota/SPK terdiri dari beberapa produk berbeda.",
+          "minLength": 0,
+          "maxLength": 10000
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembuatan dokumen."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembaruan dokumen terakhir."
+        }
+      },
+      "required": [
+        "ownerId",
+        "invoiceNumber",
+        "orderDate",
+        "deadlineDate",
+        "customerName",
+        "customerPhone",
+        "jobTitle",
+        "category",
+        "materialId",
+        "materialName",
+        "unitType",
+        "widthM",
+        "heightM",
+        "qty",
+        "totalAreaOrQty",
+        "unitPrice",
+        "unitCost",
+        "designFee",
+        "finishingDesc",
+        "finishingFee",
+        "discount",
+        "totalAmount",
+        "totalCogs",
+        "paidAmount",
+        "paymentStatus",
+        "paymentMethod",
+        "productionStatus",
+        "notes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "InventoryItem": {
+      "title": "InventoryItem",
+      "description": "Data stok bahan baku cetak, kertas, tinta, dan perlengkapan finishing digital printing.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "UID pemilik usaha.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "sku": {
+          "type": "string",
+          "description": "Kode barang atau SKU bahan baku.",
+          "minLength": 2,
+          "maxLength": 40,
+          "pattern": "^[A-Z0-9\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Nama lengkap bahan baku atau tinta.",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "category": {
+          "type": "string",
+          "description": "Kategori inventori bahan, ATK, atau sparepart.",
+          "enum": [
+            "Bahan Outdoor",
+            "Bahan Indoor & Sticker",
+            "Kertas A3+ & Media",
+            "Tinta & Toner",
+            "Display & Finishing",
+            "ATK & Perlengkapan",
+            "Part & Storage IT"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "description": "Satuan ukur stok.",
+          "enum": [
+            "m2",
+            "Lembar",
+            "Roll",
+            "Liter",
+            "Botol",
+            "Pcs",
+            "Pack"
+          ]
+        },
+        "stockQty": {
+          "type": "number",
+          "description": "Jumlah saldo stok tersedia saat ini."
+        },
+        "minStockQty": {
+          "type": "number",
+          "description": "Batas minimum stok untuk peringatan restock."
+        },
+        "costPerUnit": {
+          "type": "number",
+          "description": "Harga beli rata-rata (HPP) per satuan."
+        },
+        "defaultSellPrice": {
+          "type": "number",
+          "description": "Harga jual standar cetak per satuan menggunakan bahan ini."
+        },
+        "supplierName": {
+          "type": "string",
+          "description": "Nama supplier utama penyedia bahan.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "location": {
+          "type": "string",
+          "description": "Rak atau lokasi penyimpanan bahan di gudang/workshop.",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembuatan dokumen."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembaruan terakhir."
+        }
+      },
+      "required": [
+        "ownerId",
+        "sku",
+        "name",
+        "category",
+        "unit",
+        "stockQty",
+        "minStockQty",
+        "costPerUnit",
+        "defaultSellPrice",
+        "supplierName",
+        "location",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CashTransaction": {
+      "title": "CashTransaction",
+      "description": "Jurnal transaksi arus kas masuk dan keluar untuk pembukuan dan perhitungan laporan laba rugi.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "UID pemilik usaha.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "txDate": {
+          "type": "string",
+          "description": "Tanggal transaksi (YYYY-MM-DD).",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "referenceNo": {
+          "type": "string",
+          "description": "Nomor bukti kas atau referensi nota.",
+          "minLength": 2,
+          "maxLength": 50
+        },
+        "type": {
+          "type": "string",
+          "description": "Jenis aliran kas.",
+          "enum": [
+            "Pemasukan",
+            "Pengeluaran"
+          ]
+        },
+        "pnlGroup": {
+          "type": "string",
+          "description": "Pos akun dalam Laporan Laba Rugi.",
+          "enum": [
+            "Pendapatan Cetak",
+            "Pendapatan Jasa & Desain",
+            "HPP Bahan & Tinta",
+            "HPP Subkon & Produksi",
+            "Beban Gaji & Operator",
+            "Beban Listrik & Utilitas",
+            "Beban Sewa & Tempat",
+            "Beban Servis & Mesin",
+            "Beban Operasional Lainnya",
+            "Non-Laba Rugi / Modal"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "description": "Keterangan detail transaksi kas.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "amount": {
+          "type": "number",
+          "description": "Nominal uang dalam Rupiah."
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Akun kas/bank yang terpengaruh.",
+          "enum": [
+            "Tunai",
+            "Transfer Bank",
+            "QRIS"
+          ]
+        },
+        "relatedId": {
+          "type": "string",
+          "description": "ID referensi order atau hutang terkait.",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pencatatan."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembaruan."
+        }
+      },
+      "required": [
+        "ownerId",
+        "txDate",
+        "referenceNo",
+        "type",
+        "pnlGroup",
+        "description",
+        "amount",
+        "paymentMethod",
+        "relatedId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SupplierPayable": {
+      "title": "SupplierPayable",
+      "description": "Catatan hutang usaha kepada supplier bahan baku, kertas, dan tinta.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "UID pemilik usaha.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "supplierName": {
+          "type": "string",
+          "description": "Nama vendor atau supplier bahan.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "supplierPhone": {
+          "type": "string",
+          "description": "Kontak telepon/WA bagian penagihan supplier.",
+          "minLength": 0,
+          "maxLength": 30
+        },
+        "invoiceNo": {
+          "type": "string",
+          "description": "Nomor faktur pembelian dari supplier.",
+          "minLength": 2,
+          "maxLength": 50
+        },
+        "txDate": {
+          "type": "string",
+          "description": "Tanggal faktur pembelian (YYYY-MM-DD).",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "Tanggal jatuh tempo pembayaran (YYYY-MM-DD).",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "itemSummary": {
+          "type": "string",
+          "description": "Ringkasan barang/bahan yang dibeli secara tempo.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total nilai tagihan faktur supplier."
+        },
+        "paidAmount": {
+          "type": "number",
+          "description": "Jumlah yang sudah dibayarkan ke supplier."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status pelunasan hutang supplier.",
+          "enum": [
+            "Belum Lunas",
+            "Lunas"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembuatan dokumen."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembaruan terakhir."
+        }
+      },
+      "required": [
+        "ownerId",
+        "supplierName",
+        "supplierPhone",
+        "invoiceNo",
+        "txDate",
+        "dueDate",
+        "itemSummary",
+        "totalAmount",
+        "paidAmount",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StockMutationLog": {
+      "title": "StockMutationLog",
+      "description": "Kartu stok yang mencatat riwayat mutasi masuk, pemakaian cetak, dan bahan rusak/waste.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "UID pemilik usaha.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "logDate": {
+          "type": "string",
+          "description": "Tanggal mutasi stok (YYYY-MM-DD).",
+          "minLength": 10,
+          "maxLength": 10,
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "materialId": {
+          "type": "string",
+          "description": "ID bahan baku yang mengalami mutasi.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "materialName": {
+          "type": "string",
+          "description": "Nama bahan baku.",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "mutationType": {
+          "type": "string",
+          "description": "Tipe mutasi stok.",
+          "enum": [
+            "Stok Masuk (Restock)",
+            "Pemakaian Produksi",
+            "Bahan Rusak / Gagal Cetak",
+            "Penyesuaian Opname"
+          ]
+        },
+        "qtyDelta": {
+          "type": "number",
+          "description": "Jumlah perubahan stok (positif untuk masuk, negatif untuk keluar)."
+        },
+        "resultingStock": {
+          "type": "number",
+          "description": "Saldo stok akhir setelah mutasi."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Satuan stok bahan.",
+          "minLength": 1,
+          "maxLength": 20
+        },
+        "referenceInfo": {
+          "type": "string",
+          "description": "Keterangan nomor SPK, faktur restock, atau alasan opname.",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pencatatan mutasi."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembaruan log."
+        }
+      },
+      "required": [
+        "ownerId",
+        "logDate",
+        "materialId",
+        "materialName",
+        "mutationType",
+        "qtyDelta",
+        "resultingStock",
+        "unit",
+        "referenceInfo",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "StoreSettings": {
+      "title": "StoreSettings",
+      "description": "Pengaturan profil toko digital printing, tema warna aplikasi, preferensi autosave, dan state terakhir pengguna.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "UID pemilik usaha.",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "storeName": {
+          "type": "string",
+          "description": "Nama resmi toko atau workshop digital printing.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "tagline": {
+          "type": "string",
+          "description": "Slogan atau sub-judul layanan pada kop nota.",
+          "minLength": 0,
+          "maxLength": 180
+        },
+        "ownerName": {
+          "type": "string",
+          "description": "Nama pemilik atau penanggung jawab pembukuan.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "phone": {
+          "type": "string",
+          "description": "Nomor telepon atau WhatsApp resmi toko.",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "address": {
+          "type": "string",
+          "description": "Alamat lengkap workshop atau percetakan.",
+          "minLength": 0,
+          "maxLength": 250
+        },
+        "bankAccountInfo": {
+          "type": "string",
+          "description": "Informasi rekening bank untuk pembayaran transfer pada nota.",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "invoiceFooterNote": {
+          "type": "string",
+          "description": "Catatan syarat dan ketentuan di bagian bawah nota/invoice.",
+          "minLength": 0,
+          "maxLength": 250
+        },
+        "themeColor": {
+          "type": "string",
+          "description": "Tema warna aksen utama antarmuka aplikasi.",
+          "enum": [
+            "slate",
+            "indigo",
+            "emerald",
+            "amber",
+            "rose"
+          ]
+        },
+        "autoSaveEnabled": {
+          "type": "boolean",
+          "description": "Status aktif/tidaknya fitur autosave ke Cloud Firestore."
+        },
+        "lastActiveTab": {
+          "type": "string",
+          "description": "Tab navigasi terakhir yang disimpan pengguna.",
+          "enum": [
+            "DASHBOARD",
+            "ORDERS",
+            "INVENTORY",
+            "CASH",
+            "PNL",
+            "SETTINGS"
+          ]
+        },
+        "lastSavedLabel": {
+          "type": "string",
+          "description": "Keterangan waktu penyimpanan terakhir.",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "themeMode": {
+          "type": "string",
+          "description": "Mode tampilan tema aplikasi (terang atau gelap).",
+          "enum": [
+            "light",
+            "dark"
+          ]
+        },
+        "logoDataUrl": {
+          "type": "string",
+          "description": "Data URL logo toko hasil kompresi dari upload drive lokal.",
+          "minLength": 0,
+          "maxLength": 150000
+        },
+        "customStoreUrl": {
+          "type": "string",
+          "description": "Link tautan resmi toko atau katalog online yang dapat diganti di pengaturan.",
+          "minLength": 0,
+          "maxLength": 300
+        },
+        "customSlug": {
+          "type": "string",
+          "description": "Slug kustom URL akses aplikasi toko.",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "activeCashierName": {
+          "type": "string",
+          "description": "Nama kasir aktif yang sedang bertugas di menu Kasir dan SPK.",
+          "minLength": 0,
+          "maxLength": 80
+        },
+        "cashierList": {
+          "type": "array",
+          "description": "Daftar nama kasir yang disimpan untuk pilihan transaksi Kasir dan SPK."
+        },
+        "appAuthEmail": {
+          "type": "string",
+          "description": "Email akun login khusus aplikasi.",
+          "minLength": 0,
+          "maxLength": 120
+        },
+        "appAuthPhone": {
+          "type": "string",
+          "description": "Nomor WhatsApp verifikasi login khusus aplikasi.",
+          "minLength": 0,
+          "maxLength": 40
+        },
+        "appAuthPasswordHash": {
+          "type": "string",
+          "description": "Hash password khusus aplikasi (bukan password email).",
+          "minLength": 0,
+          "maxLength": 128
+        },
+        "appAuthVerified": {
+          "type": "boolean",
+          "description": "Status verifikasi akun aplikasi via email atau WhatsApp."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembuatan dokumen pengaturan."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Waktu pembaruan pengaturan terakhir."
+        }
+      },
+      "required": [
+        "ownerId",
+        "storeName",
+        "tagline",
+        "ownerName",
+        "phone",
+        "address",
+        "bankAccountInfo",
+        "invoiceFooterNote",
+        "themeColor",
+        "autoSaveEnabled",
+        "lastActiveTab",
+        "lastSavedLabel",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "RemoteCameraSession": {
+      "title": "RemoteCameraSession",
+      "description": "Sesi real-time penghubung kamera scanner ponsel eksternal (QR Auto-Connect) ke keranjang POS Web Desktop.",
+      "type": "object",
+      "properties": {
+        "sessionCode": {
+          "type": "string",
+          "description": "Kode sesi 6 digit kasir desktop.",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "msgId": {
+          "type": "string",
+          "description": "ID unik pesan scan atau handshake.",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "type": {
+          "type": "string",
+          "description": "Jenis pesan relay kamera ponsel.",
+          "enum": [
+            "SCAN",
+            "ADJUST_DELTA",
+            "REMOVE_SKU",
+            "HELLO",
+            "ACK"
+          ]
+        },
+        "sku": {
+          "type": "string",
+          "description": "Kode SKU / Barcode produk yang dipindai.",
+          "minLength": 0,
+          "maxLength": 64
+        },
+        "deltaQty": {
+          "type": "number",
+          "description": "Perubahan kuantitas barang."
+        },
+        "sendMode": {
+          "type": "string",
+          "description": "Mode pengiriman data scan dari ponsel ke desktop.",
+          "enum": [
+            "AUTO_SEND",
+            "MANUAL_SEND"
+          ]
+        },
+        "deviceName": {
+          "type": "string",
+          "description": "Nama perangkat ponsel pengirim.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "itemName": {
+          "type": "string",
+          "description": "Nama produk ATK hasil pencocokan katalog.",
+          "minLength": 0,
+          "maxLength": 160
+        },
+        "unitPrice": {
+          "type": "number",
+          "description": "Harga jual satuan produk."
+        },
+        "unitCost": {
+          "type": "number",
+          "description": "Harga modal HPP satuan produk."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Satuan barang.",
+          "minLength": 0,
+          "maxLength": 30
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Waktu pengiriman pesan dalam milidetik."
+        },
+        "desktopAck": {
+          "type": "boolean",
+          "description": "Status konfirmasi koneksi dari kasir desktop."
+        },
+        "catalogJson": {
+          "type": "string",
+          "description": "JSON daftar produk ATK untuk sinkronisasi ke ponsel.",
+          "minLength": 0,
+          "maxLength": 90000
+        },
+        "recentScansJson": {
+          "type": "string",
+          "description": "JSON antrean riwayat pesan scan terbaru agar tidak ada scan yang terlewat.",
+          "minLength": 0,
+          "maxLength": 40000
+        }
+      },
+      "required": [
+        "sessionCode",
+        "msgId",
+        "type",
+        "deviceName",
+        "timestamp"
+      ]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": {
+        "$ref": "#/entities/PrintOrder"
+      },
+      "description": "Koleksi pesanan cetak (SPK), tagihan piutang pelanggan, dan perhitungan HPP per order."
+    },
+    "/inventory/{itemId}": {
+      "schema": {
+        "$ref": "#/entities/InventoryItem"
+      },
+      "description": "Koleksi master stok bahan baku cetak, kertas, tinta, dan display."
+    },
+    "/transactions/{txId}": {
+      "schema": {
+        "$ref": "#/entities/CashTransaction"
+      },
+      "description": "Koleksi jurnal transaksi kas masuk dan kas keluar untuk laporan arus kas dan laba rugi."
+    },
+    "/payables/{payableId}": {
+      "schema": {
+        "$ref": "#/entities/SupplierPayable"
+      },
+      "description": "Koleksi daftar hutang jatuh tempo kepada supplier bahan baku cetak."
+    },
+    "/stockLogs/{logId}": {
+      "schema": {
+        "$ref": "#/entities/StockMutationLog"
+      },
+      "description": "Koleksi riwayat mutasi keluar-masuk stok bahan baku (Kartu Stok)."
+    },
+    "/settings/{settingId}": {
+      "schema": {
+        "$ref": "#/entities/StoreSettings"
+      },
+      "description": "Koleksi pengaturan profil toko, tema warna, preferensi autosave, dan state terakhir per pemilik usaha."
+    },
+    "/remoteCameraSessions/{sessionId}": {
+      "schema": {
+        "$ref": "#/entities/RemoteCameraSession"
+      },
+      "description": "Koleksi sesi real-time penghubung kamera scanner ponsel eksternal (QR Auto-Connect) ke keranjang POS Web Desktop."
+    }
+  }
+}

@@ -1,0 +1,313 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --theme-primary: #0f172a;
+    --theme-primary-hover: #1e293b;
+    --theme-surface-tint: #f8fafc;
+  }
+
+  [data-theme="slate"] {
+    --theme-primary: #0f172a;
+    --theme-primary-hover: #1e293b;
+    --theme-surface-tint: #f8fafc;
+  }
+
+  [data-theme="indigo"] {
+    --theme-primary: #3730a3;
+    --theme-primary-hover: #4338ca;
+    --theme-surface-tint: #f5f7ff;
+  }
+
+  [data-theme="emerald"] {
+    --theme-primary: #065f46;
+    --theme-primary-hover: #047857;
+    --theme-surface-tint: #f2fbf7;
+  }
+
+  [data-theme="amber"] {
+    --theme-primary: #92400e;
+    --theme-primary-hover: #b45309;
+    --theme-surface-tint: #fffbf2;
+  }
+
+  [data-theme="rose"] {
+    --theme-primary: #9f1239;
+    --theme-primary-hover: #be123c;
+    --theme-surface-tint: #fff5f7;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  .font-mono,
+  .tabular-nums {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Dynamic Theme Override for Primary Action Surfaces */
+.app-theme-root {
+  background-color: var(--theme-surface-tint);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.app-theme-root .bg-slate-900 {
+  background-color: var(--theme-primary) !important;
+}
+
+.app-theme-root .hover\:bg-slate-800:hover {
+  background-color: var(--theme-primary-hover) !important;
+}
+
+.app-theme-root .border-slate-900 {
+  border-color: var(--theme-primary) !important;
+}
+
+/* Dark Mode Surface Overrides (strictly on screen only, never during print) */
+@media screen {
+  .app-theme-root[data-color-mode="dark"] {
+    --theme-surface-tint: #090d16;
+    background-color: #090d16 !important;
+    color: #f1f5f9 !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"][data-theme="slate"] {
+    --theme-primary: #2563eb;
+    --theme-primary-hover: #3b82f6;
+  }
+
+  .app-theme-root[data-color-mode="dark"] *:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    border-color: inherit;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .bg-white:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    background-color: #111827 !important;
+    color: #f1f5f9;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .bg-slate-50:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-slate-50\/90:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-slate-50\/80:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-slate-50\/70:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-slate-50\/60:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-slate-50\/50:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-slate-100\/80:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-slate-200\/70:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] thead:not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] thead tr:not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] thead th:not(.print-sheet-paper *) {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .bg-emerald-50\/70:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-emerald-50\/40:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-emerald-50:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    background-color: #064e3b !important;
+    color: #f8fafc !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .bg-indigo-50\/70:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-amber-50\/70:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .bg-amber-50\/80:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .bg-slate-100:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    background-color: #0f172a !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .text-slate-900:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .text-slate-800:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    color: #f8fafc !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .text-slate-700:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .text-slate-600:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    color: #cbd5e1 !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .text-slate-500:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .text-slate-400:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    color: #94a3b8 !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .border-slate-200:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .border-slate-300:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .divide-slate-200:not(.print-sheet-paper):not(.print-sheet-paper *) > :not([hidden]) ~ :not([hidden]),
+  .app-theme-root[data-color-mode="dark"] .divide-slate-100:not(.print-sheet-paper):not(.print-sheet-paper *) > :not([hidden]) ~ :not([hidden]) {
+    border-color: #334155 !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] input:not([type="checkbox"]):not([type="radio"]):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] select:not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] textarea:not(.print-sheet-paper *) {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+  }
+
+  .app-theme-root[data-color-mode="dark"] .hover\:bg-slate-50:hover:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .hover\:bg-slate-50\/70:hover:not(.print-sheet-paper):not(.print-sheet-paper *),
+  .app-theme-root[data-color-mode="dark"] .hover\:bg-slate-100:hover:not(.print-sheet-paper):not(.print-sheet-paper *) {
+    background-color: #1e293b !important;
+  }
+}
+
+/* Keep physical print paper preview always authentic white paper */
+.print-sheet-paper {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Official Sign in with Google button style */
+.gsi-material-button {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-appearance: none;
+  background-color: #ffffff;
+  background-image: none;
+  border: 1px solid #747775;
+  border-radius: 6px;
+  box-sizing: border-box;
+  color: #1f1f1f;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', 'Roboto', arial, sans-serif;
+  font-size: 13px;
+  height: 38px;
+  letter-spacing: 0.25px;
+  outline: none;
+  overflow: hidden;
+  padding: 0 12px;
+  position: relative;
+  text-align: center;
+  transition: background-color .218s, border-color .218s, box-shadow .218s;
+  vertical-align: middle;
+  white-space: nowrap;
+  width: auto;
+  max-width: 400px;
+  min-width: min-content;
+}
+
+.gsi-material-button .gsi-material-button-icon {
+  height: 18px;
+  margin-right: 10px;
+  min-width: 18px;
+  width: 18px;
+}
+
+.gsi-material-button .gsi-material-button-content-wrapper {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  height: 100%;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+.gsi-material-button .gsi-material-button-contents {
+  flex-grow: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.gsi-material-button .gsi-material-button-state {
+  transition: opacity .218s;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.gsi-material-button:disabled {
+  cursor: default;
+  background-color: #ffffff61;
+  border-color: #1f1f1f1f;
+}
+
+.gsi-material-button:hover:not(:disabled) {
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .30), 0 1px 3px 1px rgba(60, 64, 67, .15);
+  background-color: #f8fafc;
+}
+
+/* Styling Wajib Video Scanner Barcode ATK (html5-qrcode) */
+#qr-reader {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+#qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 12px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  html,
+  body,
+  #root,
+  .app-theme-root,
+  .app-theme-root[data-color-mode="dark"],
+  .app-theme-root[data-color-mode="light"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .print-modal-backdrop {
+    position: static !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+  .print-modal-shell {
+    border: none !important;
+    box-shadow: none !important;
+    max-width: none !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+  }
+  .print-preview-stage {
+    padding: 0 !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+}

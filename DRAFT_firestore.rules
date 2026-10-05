@@ -1,0 +1,387 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net (Default-Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    // Validation Blueprint: PrintOrder
+    function isValidPrintOrder(data) {
+      return data.keys().hasAll([
+        'ownerId', 'invoiceNumber', 'orderDate', 'deadlineDate',
+        'customerName', 'customerPhone', 'jobTitle', 'category',
+        'materialId', 'materialName', 'unitType', 'widthM', 'heightM',
+        'qty', 'totalAreaOrQty', 'unitPrice', 'unitCost', 'designFee',
+        'finishingDesc', 'finishingFee', 'discount', 'totalAmount',
+        'totalCogs', 'paidAmount', 'paymentStatus', 'paymentMethod',
+        'productionStatus', 'notes', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'invoiceNumber', 'orderDate', 'deadlineDate',
+        'customerName', 'customerPhone', 'jobTitle', 'category',
+        'materialId', 'materialName', 'unitType', 'widthM', 'heightM',
+        'qty', 'totalAreaOrQty', 'unitPrice', 'unitCost', 'designFee',
+        'finishingDesc', 'finishingFee', 'discount', 'totalAmount',
+        'totalCogs', 'paidAmount', 'paymentStatus', 'paymentMethod',
+        'productionStatus', 'notes', 'cashierName', 'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+      data.ownerId == request.auth.uid &&
+      data.invoiceNumber is string && data.invoiceNumber.size() >= 3 && data.invoiceNumber.size() <= 40 && data.invoiceNumber.matches('^[A-Z0-9\\-/]+$') &&
+      data.orderDate is string && data.orderDate.size() == 10 && data.orderDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
+      data.deadlineDate is string && data.deadlineDate.size() == 10 && data.deadlineDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
+      data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 120 &&
+      data.customerPhone is string && data.customerPhone.size() <= 30 &&
+      data.jobTitle is string && data.jobTitle.size() >= 1 && data.jobTitle.size() <= 160 &&
+      data.category is string && data.category.size() <= 40 &&
+      data.category in ['Banner & Outdoor', 'Indoor & Sticker', 'Print A3+ & Dokumen', 'Merchandise & Display', 'Offset & Kemasan'] &&
+      data.materialId is string && data.materialId.size() >= 1 && data.materialId.size() <= 128 &&
+      data.materialName is string && data.materialName.size() >= 1 && data.materialName.size() <= 120 &&
+      data.unitType is string && data.unitType.size() <= 20 &&
+      data.unitType in ['m2', 'Lembar', 'Roll', 'Pcs', 'Paket'] &&
+      data.widthM is number && data.widthM >= 0 && data.widthM <= 10000 &&
+      data.heightM is number && data.heightM >= 0 && data.heightM <= 10000 &&
+      data.qty is number && data.qty >= 1 && data.qty <= 10000000 &&
+      data.totalAreaOrQty is number && data.totalAreaOrQty >= 0 && data.totalAreaOrQty <= 100000000 &&
+      data.unitPrice is number && data.unitPrice >= 0 && data.unitPrice <= 100000000000 &&
+      data.unitCost is number && data.unitCost >= 0 && data.unitCost <= 100000000000 &&
+      data.designFee is number && data.designFee >= 0 && data.designFee <= 100000000000 &&
+      data.finishingDesc is string && data.finishingDesc.size() <= 160 &&
+      data.finishingFee is number && data.finishingFee >= 0 && data.finishingFee <= 100000000000 &&
+      data.discount is number && data.discount >= 0 && data.discount <= 100000000000 &&
+      data.totalAmount is number && data.totalAmount >= 0 && data.totalAmount <= 1000000000000 &&
+      data.totalCogs is number && data.totalCogs >= 0 && data.totalCogs <= 1000000000000 &&
+      data.paidAmount is number && data.paidAmount >= 0 && data.paidAmount <= 1000000000000 &&
+      data.paymentStatus is string && data.paymentStatus.size() <= 30 &&
+      data.paymentStatus in ['Lunas', 'DP / Belum Lunas', 'Belum Bayar'] &&
+      data.paymentMethod is string && data.paymentMethod.size() <= 30 &&
+      data.paymentMethod in ['Tunai', 'Transfer Bank', 'QRIS', 'Tempo'] &&
+      data.productionStatus is string && data.productionStatus.size() <= 30 &&
+      data.productionStatus in ['Antrean Desain', 'Proses Cetak', 'Finishing', 'Siap Ambil', 'Selesai', 'Dibatalkan'] &&
+      data.notes is string && data.notes.size() <= 300 &&
+      (!('cashierName' in data) || (data.cashierName is string && data.cashierName.size() <= 80)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: InventoryItem
+    function isValidInventoryItem(data) {
+      return data.keys().hasAll([
+        'ownerId', 'sku', 'name', 'category', 'unit',
+        'stockQty', 'minStockQty', 'costPerUnit', 'defaultSellPrice',
+        'supplierName', 'location', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'sku', 'name', 'category', 'unit',
+        'stockQty', 'minStockQty', 'costPerUnit', 'defaultSellPrice',
+        'supplierName', 'location', 'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+      data.ownerId == request.auth.uid &&
+      data.sku is string && data.sku.size() >= 2 && data.sku.size() <= 40 && data.sku.matches('^[A-Z0-9\\-]+$') &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 140 &&
+      data.category is string && data.category.size() <= 40 &&
+      data.category in ['Bahan Outdoor', 'Bahan Indoor & Sticker', 'Kertas A3+ & Media', 'Tinta & Toner', 'Display & Finishing'] &&
+      data.unit is string && data.unit.size() <= 20 &&
+      data.unit in ['m2', 'Lembar', 'Roll', 'Liter', 'Botol', 'Pcs', 'Pack'] &&
+      data.stockQty is number && data.stockQty >= 0 && data.stockQty <= 1000000000 &&
+      data.minStockQty is number && data.minStockQty >= 0 && data.minStockQty <= 1000000000 &&
+      data.costPerUnit is number && data.costPerUnit >= 0 && data.costPerUnit <= 100000000000 &&
+      data.defaultSellPrice is number && data.defaultSellPrice >= 0 && data.defaultSellPrice <= 100000000000 &&
+      data.supplierName is string && data.supplierName.size() >= 1 && data.supplierName.size() <= 120 &&
+      data.location is string && data.location.size() <= 80 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: CashTransaction
+    function isValidCashTransaction(data) {
+      return data.keys().hasAll([
+        'ownerId', 'txDate', 'referenceNo', 'type', 'pnlGroup',
+        'description', 'amount', 'paymentMethod', 'relatedId',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'txDate', 'referenceNo', 'type', 'pnlGroup',
+        'description', 'amount', 'paymentMethod', 'relatedId',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+      data.ownerId == request.auth.uid &&
+      data.txDate is string && data.txDate.size() == 10 && data.txDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
+      data.referenceNo is string && data.referenceNo.size() >= 2 && data.referenceNo.size() <= 50 &&
+      data.type is string && data.type.size() <= 20 &&
+      data.type in ['Pemasukan', 'Pengeluaran'] &&
+      data.pnlGroup is string && data.pnlGroup.size() <= 50 &&
+      data.pnlGroup in [
+        'Pendapatan Cetak', 'Pendapatan Jasa & Desain', 'HPP Bahan & Tinta',
+        'HPP Subkon & Produksi', 'Beban Gaji & Operator', 'Beban Listrik & Utilitas',
+        'Beban Sewa & Tempat', 'Beban Servis & Mesin', 'Beban Operasional Lainnya',
+        'Non-Laba Rugi / Modal'
+      ] &&
+      data.description is string && data.description.size() >= 1 && data.description.size() <= 200 &&
+      data.amount is number && data.amount >= 0 && data.amount <= 1000000000000 &&
+      data.paymentMethod is string && data.paymentMethod.size() <= 30 &&
+      data.paymentMethod in ['Tunai', 'Transfer Bank', 'QRIS'] &&
+      data.relatedId is string && data.relatedId.size() <= 128 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: SupplierPayable
+    function isValidSupplierPayable(data) {
+      return data.keys().hasAll([
+        'ownerId', 'supplierName', 'supplierPhone', 'invoiceNo',
+        'txDate', 'dueDate', 'itemSummary', 'totalAmount',
+        'paidAmount', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'supplierName', 'supplierPhone', 'invoiceNo',
+        'txDate', 'dueDate', 'itemSummary', 'totalAmount',
+        'paidAmount', 'status', 'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+      data.ownerId == request.auth.uid &&
+      data.supplierName is string && data.supplierName.size() >= 1 && data.supplierName.size() <= 120 &&
+      data.supplierPhone is string && data.supplierPhone.size() <= 30 &&
+      data.invoiceNo is string && data.invoiceNo.size() >= 2 && data.invoiceNo.size() <= 50 &&
+      data.txDate is string && data.txDate.size() == 10 && data.txDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
+      data.dueDate is string && data.dueDate.size() == 10 && data.dueDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
+      data.itemSummary is string && data.itemSummary.size() >= 1 && data.itemSummary.size() <= 200 &&
+      data.totalAmount is number && data.totalAmount >= 0 && data.totalAmount <= 1000000000000 &&
+      data.paidAmount is number && data.paidAmount >= 0 && data.paidAmount <= 1000000000000 &&
+      data.status is string && data.status.size() <= 20 &&
+      data.status in ['Belum Lunas', 'Lunas'] &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: StockMutationLog
+    function isValidStockMutationLog(data) {
+      return data.keys().hasAll([
+        'ownerId', 'logDate', 'materialId', 'materialName',
+        'mutationType', 'qtyDelta', 'resultingStock', 'unit',
+        'referenceInfo', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'logDate', 'materialId', 'materialName',
+        'mutationType', 'qtyDelta', 'resultingStock', 'unit',
+        'referenceInfo', 'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+      data.ownerId == request.auth.uid &&
+      data.logDate is string && data.logDate.size() == 10 && data.logDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$') &&
+      data.materialId is string && data.materialId.size() >= 1 && data.materialId.size() <= 128 &&
+      data.materialName is string && data.materialName.size() >= 1 && data.materialName.size() <= 140 &&
+      data.mutationType is string && data.mutationType.size() <= 40 &&
+      data.mutationType in ['Stok Masuk (Restock)', 'Pemakaian Produksi', 'Bahan Rusak / Gagal Cetak', 'Penyesuaian Opname'] &&
+      data.qtyDelta is number && data.qtyDelta >= -1000000000 && data.qtyDelta <= 1000000000 &&
+      data.resultingStock is number && data.resultingStock >= 0 && data.resultingStock <= 1000000000 &&
+      data.unit is string && data.unit.size() >= 1 && data.unit.size() <= 20 &&
+      data.referenceInfo is string && data.referenceInfo.size() >= 1 && data.referenceInfo.size() <= 160 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: StoreSettings
+    function isValidStoreSettings(data) {
+      return data.keys().hasAll([
+        'ownerId', 'storeName', 'tagline', 'ownerName', 'phone',
+        'address', 'bankAccountInfo', 'invoiceFooterNote', 'themeColor',
+        'autoSaveEnabled', 'lastActiveTab', 'lastSavedLabel',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'storeName', 'tagline', 'ownerName', 'phone',
+        'address', 'bankAccountInfo', 'invoiceFooterNote', 'themeColor',
+        'autoSaveEnabled', 'lastActiveTab', 'lastSavedLabel',
+        'themeMode', 'logoDataUrl', 'customStoreUrl', 'customSlug',
+        'activeCashierName', 'cashierList', 'appAuthEmail', 'appAuthPhone',
+        'appAuthPasswordHash', 'appAuthVerified',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+      data.ownerId == request.auth.uid &&
+      data.storeName is string && data.storeName.size() >= 1 && data.storeName.size() <= 120 &&
+      data.tagline is string && data.tagline.size() <= 180 &&
+      data.ownerName is string && data.ownerName.size() <= 120 &&
+      data.phone is string && data.phone.size() <= 40 &&
+      data.address is string && data.address.size() <= 250 &&
+      data.bankAccountInfo is string && data.bankAccountInfo.size() <= 200 &&
+      data.invoiceFooterNote is string && data.invoiceFooterNote.size() <= 250 &&
+      data.themeColor is string && data.themeColor.size() <= 20 &&
+      data.themeColor in ['slate', 'indigo', 'emerald', 'amber', 'rose'] &&
+      data.autoSaveEnabled is bool &&
+      data.lastActiveTab is string && data.lastActiveTab.size() <= 20 &&
+      data.lastActiveTab in ['DASHBOARD', 'ORDERS', 'INVENTORY', 'CASH', 'PNL', 'SETTINGS'] &&
+      data.lastSavedLabel is string && data.lastSavedLabel.size() <= 80 &&
+      (!('themeMode' in data) || (data.themeMode is string && data.themeMode.size() <= 10 && data.themeMode in ['light', 'dark'])) &&
+      (!('logoDataUrl' in data) || (data.logoDataUrl is string && data.logoDataUrl.size() <= 150000)) &&
+      (!('customStoreUrl' in data) || (data.customStoreUrl is string && data.customStoreUrl.size() <= 300)) &&
+      (!('customSlug' in data) || (data.customSlug is string && data.customSlug.size() <= 80)) &&
+      (!('activeCashierName' in data) || (data.activeCashierName is string && data.activeCashierName.size() <= 80)) &&
+      (!('cashierList' in data) || (data.cashierList is list && data.cashierList.size() >= 1 && data.cashierList.size() <= 20 && data.cashierList[0] is string && data.cashierList[0].size() <= 80)) &&
+      (!('appAuthEmail' in data) || (data.appAuthEmail is string && data.appAuthEmail.size() <= 120)) &&
+      (!('appAuthPhone' in data) || (data.appAuthPhone is string && data.appAuthPhone.size() <= 40)) &&
+      (!('appAuthPasswordHash' in data) || (data.appAuthPasswordHash is string && data.appAuthPasswordHash.size() <= 128)) &&
+      (!('appAuthVerified' in data) || (data.appAuthVerified is bool)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Collection: /orders/{orderId}
+    match /orders/{orderId} {
+      allow get: if isSignedIn() && isValidId(orderId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(orderId) && isValidPrintOrder(incoming()) &&
+        incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isSignedIn() && isValidPrintOrder(incoming()) && isValidId(orderId) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        existing().productionStatus != 'Dibatalkan' && (
+          // Action 1: Update Production Status / Notes
+          incoming().diff(existing()).affectedKeys().hasOnly(['productionStatus', 'notes', 'cashierName', 'updatedAt']) ||
+          // Action 2: Record Receivable Payment / Settlement
+          incoming().diff(existing()).affectedKeys().hasOnly(['paidAmount', 'paymentStatus', 'paymentMethod', 'updatedAt']) ||
+          // Action 3: Full Order Edit by Owner
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'deadlineDate', 'customerName', 'customerPhone', 'jobTitle', 'category',
+            'materialId', 'materialName', 'unitType', 'widthM', 'heightM', 'qty',
+            'totalAreaOrQty', 'unitPrice', 'unitCost', 'designFee', 'finishingDesc',
+            'finishingFee', 'discount', 'totalAmount', 'totalCogs', 'paidAmount',
+            'paymentStatus', 'paymentMethod', 'productionStatus', 'notes', 'cashierName', 'updatedAt'
+          ])
+        );
+      allow delete: if isSignedIn() && isValidId(orderId) && existing().ownerId == request.auth.uid;
+    }
+
+    // Collection: /inventory/{itemId}
+    match /inventory/{itemId} {
+      allow get: if isSignedIn() && isValidId(itemId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(itemId) && isValidInventoryItem(incoming()) &&
+        incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isSignedIn() && isValidInventoryItem(incoming()) && isValidId(itemId) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          // Action 1: Stock Adjustment / Restock / Production Deduction
+          incoming().diff(existing()).affectedKeys().hasOnly(['stockQty', 'costPerUnit', 'updatedAt']) ||
+          // Action 2: Master Item Details Edit by Owner
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'sku', 'name', 'category', 'unit', 'stockQty', 'minStockQty',
+            'costPerUnit', 'defaultSellPrice', 'supplierName', 'location', 'updatedAt'
+          ])
+        );
+      allow delete: if isSignedIn() && isValidId(itemId) && existing().ownerId == request.auth.uid;
+    }
+
+    // Collection: /transactions/{txId}
+    match /transactions/{txId} {
+      allow get: if isSignedIn() && isValidId(txId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(txId) && isValidCashTransaction(incoming()) &&
+        incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isSignedIn() && isValidCashTransaction(incoming()) && isValidId(txId) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          // Action 1: Update Transaction Details by Owner
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'txDate', 'referenceNo', 'type', 'pnlGroup', 'description',
+            'amount', 'paymentMethod', 'relatedId', 'updatedAt'
+          ])
+        );
+      allow delete: if isSignedIn() && isValidId(txId) && existing().ownerId == request.auth.uid;
+    }
+
+    // Collection: /payables/{payableId}
+    match /payables/{payableId} {
+      allow get: if isSignedIn() && isValidId(payableId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(payableId) && isValidSupplierPayable(incoming()) &&
+        incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isSignedIn() && isValidSupplierPayable(incoming()) && isValidId(payableId) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        existing().status != 'Lunas' && (
+          // Action 1: Pay / Settle Supplier Payable
+          incoming().diff(existing()).affectedKeys().hasOnly(['paidAmount', 'status', 'updatedAt']) ||
+          // Action 2: Edit Payable Record
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'supplierName', 'supplierPhone', 'invoiceNo', 'txDate',
+            'dueDate', 'itemSummary', 'totalAmount', 'paidAmount', 'status', 'updatedAt'
+          ])
+        );
+      allow delete: if isSignedIn() && isValidId(payableId) && existing().ownerId == request.auth.uid;
+    }
+
+    // Collection: /stockLogs/{logId}
+    match /stockLogs/{logId} {
+      allow get: if isSignedIn() && isValidId(logId) && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(logId) && isValidStockMutationLog(incoming()) &&
+        incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isSignedIn() && isValidStockMutationLog(incoming()) && isValidId(logId) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          // Action 1: Update Reference Note on Stock Log
+          incoming().diff(existing()).affectedKeys().hasOnly(['referenceInfo', 'updatedAt'])
+        );
+      allow delete: if isSignedIn() && isValidId(logId) && existing().ownerId == request.auth.uid;
+    }
+
+    // Collection: /settings/{settingId}
+    match /settings/{settingId} {
+      allow get: if isSignedIn() && isValidId(settingId) && settingId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(settingId) && settingId == request.auth.uid &&
+        isValidStoreSettings(incoming()) &&
+        incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isSignedIn() && isValidStoreSettings(incoming()) && isValidId(settingId) &&
+        settingId == request.auth.uid &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time && (
+          // Action 1: Update Store Profile, Theme, Autosave & Last Saved State
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'storeName', 'tagline', 'ownerName', 'phone', 'address',
+            'bankAccountInfo', 'invoiceFooterNote', 'themeColor',
+            'autoSaveEnabled', 'lastActiveTab', 'lastSavedLabel',
+            'themeMode', 'logoDataUrl', 'customStoreUrl', 'customSlug',
+            'activeCashierName', 'cashierList', 'appAuthEmail', 'appAuthPhone',
+            'appAuthPasswordHash', 'appAuthVerified', 'updatedAt'
+          ])
+        );
+      allow delete: if isSignedIn() && isValidId(settingId) && settingId == request.auth.uid && existing().ownerId == request.auth.uid;
+    }
+  }
+}

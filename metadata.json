@@ -1,0 +1,8 @@
+{
+  "name": "CetakPro Ledger — Pembukuan & Stok Digital Printing",
+  "description": "Aplikasi pembukuan lengkap usaha digital printing meliputi kasir pesanan cetak (SPK), manajemen stok bahan baku, piutang-hutang, jurnal kas, dan laporan laba rugi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
